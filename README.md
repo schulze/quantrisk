@@ -17,6 +17,20 @@ secriskquant is a proof of concept for quantitative security risk analysis (FAIR
 
 - Connection of control gaps and FAIR-CAM function control effectiveness with scenario estimates for simulations or in the data model.
 
+## Screenshots
+
+### Editing a FAIR loss event scenario
+
+![Editing a FAIR loss event scenario](docs/screenshots/loss-event-scenario-edit.png)
+
+### FAIR-CAM control functions and effectiveness
+
+![FAIR-CAM control details](docs/screenshots/fair-cam-control-details.png)
+
+### Loss exceedance curves
+
+![Loss exceedance curves](docs/screenshots/loss-exceedance-curve.png)
+
 ## Components
 
 ```text
