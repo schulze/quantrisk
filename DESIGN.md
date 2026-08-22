@@ -2,7 +2,7 @@
 
 ## Architecture
 
-Secquantrisk is a single Go web application backed by SQLite. Templates and static
+Secriskquant is a single Go web application backed by SQLite. Templates and static
 assets are embedded in the server binary. The main packages are:
 
 - `fair/` and `fair/cam/`: quantitative risk and control calculations.

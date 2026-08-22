@@ -1,8 +1,8 @@
-# secquantrisk
+# secriskquant
 
 > **Experiment:** This project primarily explores a tool-based approach to FAIR and FAIR-CAM security risk management. It also serves as a place for experiments with agentic coding, prototyping, and exploration.
 
-secquantrisk is a proof of concept for quantitative security risk analysis (FAIR) and control management (FAIR-CAM). It implements loss event scenarios, probability distributions, Monte Carlo simulation, and loss exceedance curves.
+secriskquant is a proof of concept for quantitative security risk analysis (FAIR) and control management (FAIR-CAM). It implements loss event scenarios, probability distributions, Monte Carlo simulation, and loss exceedance curves.
 
 ## What it does
 

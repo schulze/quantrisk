@@ -1,5 +1,5 @@
 [Unit]
-Description=secquantrisk web server
+Description=secriskquant web server
 After=network-online.target
 Wants=network-online.target
 
@@ -7,7 +7,7 @@ Wants=network-online.target
 Type=simple
 User=YOUR_SERVICE_USER
 Group=YOUR_SERVICE_GROUP
-ExecStart=/usr/local/bin/quantriskd -db /var/lib/secquantrisk/secquantrisk.db -addr :8000 -origin https://secquantrisk.example.com
+ExecStart=/usr/local/bin/quantriskd -db /var/lib/secriskquant/secriskquant.db -addr :8000 -origin https://secriskquant.example.com
 Restart=always
 RestartSec=5
 StandardOutput=journal

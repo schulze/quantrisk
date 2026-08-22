@@ -52,7 +52,7 @@ func main() {
 	}
 
 	wa, err := webauthn.New(&webauthn.Config{
-		RPDisplayName: "secquantrisk",
+		RPDisplayName: "secriskquant",
 		RPID:          rpID,
 		RPOrigins:     origins,
 		AuthenticatorSelection: protocol.AuthenticatorSelection{

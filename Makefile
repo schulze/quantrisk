@@ -1,4 +1,4 @@
-.PHONY: all clean build install service-config deploy
+.PHONY: all clean build install service-config deploy quantriskd quantriskcli
 
 all: quantriskd quantriskcli
 

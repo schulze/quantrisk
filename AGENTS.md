@@ -1,4 +1,4 @@
-# secquantrisk - Agent Context
+# secriskquant - Agent Context
 
 ## Purpose
 
