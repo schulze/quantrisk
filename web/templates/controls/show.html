@@ -16,9 +16,9 @@
         <span id="save-ind-name" class="field-saved htmx-indicator">✓</span>
     </div>
 
-    <div class="inline-field">
+    <div class="inline-field long-text-field">
         <label for="ctl-desc">Description</label>
-        <textarea id="ctl-desc" name="value" rows="2"
+        <textarea id="ctl-desc" name="value" class="autosize-textarea" data-autosize rows="4"
                   hx-patch="/controls/{{.Control.ID}}" hx-vals='{"field":"description"}'
                   hx-trigger="change" hx-swap="none"
                   hx-indicator="#save-ind-desc" placeholder="Describe this control…">{{.Control.Description}}</textarea>

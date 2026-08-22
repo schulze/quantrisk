@@ -10,6 +10,32 @@
     <link rel="stylesheet" href="/static/style.css">
     <script src="/static/htmx.min.js"></script>
     <script>
+    function resizeTextarea(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    function resizeTextareas(root) {
+        if (root.matches && root.matches('textarea[data-autosize]')) {
+            resizeTextarea(root);
+        }
+        if (root.querySelectorAll) {
+            root.querySelectorAll('textarea[data-autosize]').forEach(resizeTextarea);
+        }
+    }
+
+    document.addEventListener('input', function(event) {
+        if (event.target.matches('textarea[data-autosize]')) {
+            resizeTextarea(event.target);
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        resizeTextareas(document);
+    });
+    document.addEventListener('htmx:load', function(event) {
+        resizeTextareas(event.detail.elt);
+    });
+
     function toggleDetail(btn, url) {
         var row = btn.closest('tr').nextElementSibling;
         if (row.classList.contains('open')) {

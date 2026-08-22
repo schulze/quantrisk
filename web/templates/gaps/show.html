@@ -15,9 +15,9 @@
                placeholder="Gap name">
     </div>
 
-    <div class="inline-field">
+    <div class="inline-field long-text-field">
         <label for="gap-desc">Description</label>
-        <textarea id="gap-desc" name="value" rows="2"
+        <textarea id="gap-desc" name="value" class="autosize-textarea" data-autosize rows="4"
                   hx-patch="/gaps/{{.Gap.ID}}" hx-vals='{"field":"description"}'
                   hx-trigger="change" hx-swap="none"
                   placeholder="Describe this gap…">{{.Gap.Description}}</textarea>

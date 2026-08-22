@@ -255,6 +255,16 @@ button.danger:hover { background: #cc0000; color: #fff; }
   min-height: 2.4em;
 }
 
+.inline-field.long-text-field {
+  align-items: start;
+}
+
+.inline-field .autosize-textarea {
+  min-height: 7rem;
+  line-height: 1.5;
+  overflow-y: hidden;
+}
+
 .field-ro {
   font-size: 0.95rem;
   padding: 0.3rem 0.4rem;
