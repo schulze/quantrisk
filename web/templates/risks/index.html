@@ -1,0 +1,27 @@
+{{define "risk-index"}}
+<h1>Loss Event Scenarios</h1>
+<form hx-post="/risks" class="actions">
+    <button type="submit" class="btn">New Scenario</button>
+</form>
+{{template "risk-list" .}}
+{{template "audit-log" (dict "Entries" .AuditLog)}}
+{{end}}
+
+{{define "risk-list"}}
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            <th>Identifier</th>
+            <th>Scenario</th>
+            <th>LEF (est.)</th>
+            <th></th>
+        </tr>
+    </thead>
+    {{range .Risks}}
+        {{template "risk-row" .}}
+    {{else}}
+    <tbody><tr><td colspan="5">No loss event scenarios defined yet.</td></tr></tbody>
+    {{end}}
+</table>
+{{end}}

@@ -1,0 +1,29 @@
+{{define "gap-index"}}
+<h1>Gaps</h1>
+<form hx-post="/gaps" class="actions">
+    <button type="submit" class="btn">New Gap</button>
+</form>
+{{template "gap-list" .}}
+{{template "audit-log" (dict "Entries" .AuditLog)}}
+{{end}}
+
+{{define "gap-list"}}
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            <th>Identifier</th>
+            <th>Name</th>
+            <th>Severity</th>
+            <th>Status</th>
+            <th>Parent</th>
+            <th></th>
+        </tr>
+    </thead>
+    {{range .Gaps}}
+        {{template "gap-row" .}}
+    {{else}}
+    <tbody><tr><td colspan="7">No gaps defined yet.</td></tr></tbody>
+    {{end}}
+</table>
+{{end}}

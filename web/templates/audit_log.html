@@ -1,0 +1,31 @@
+{{define "audit-log"}}
+{{if .Entries}}
+<details class="audit-log">
+    <summary>Change Log ({{len .Entries}})</summary>
+    <table class="audit-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Action</th>
+                <th>Entity</th>
+                <th>Field</th>
+                <th>Old Value</th>
+                <th>New Value</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{range .Entries}}
+        <tr class="audit-{{.Action}}">
+            <td class="audit-time">{{.CreatedAt.Format "2006-01-02 15:04"}}</td>
+            <td><span class="audit-badge audit-badge-{{.Action}}">{{.Action}}</span></td>
+            <td>{{if .Identifier}}{{.Identifier}}{{else}}#{{.EntityID}}{{end}}</td>
+            <td>{{.Field}}</td>
+            <td class="audit-value">{{if .OldValue}}{{.OldValue}}{{end}}</td>
+            <td class="audit-value">{{if .NewValue}}{{.NewValue}}{{end}}</td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+</details>
+{{end}}
+{{end}}

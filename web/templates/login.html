@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - secquantrisk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <a href="/" class="site-title">secquantrisk</a>
+    </header>
+    <main class="login-page">
+        <div class="login-card">
+            {{if .Error}}
+            <h2>{{.Title}}</h2>
+            <p class="auth-error" style="display:block">{{.Error}}</p>
+            <a href="/login" class="btn btn-primary btn-block">Go to Login</a>
+
+            {{else if .SetupMode}}
+            <h2>Create Account</h2>
+            <p>No users exist yet. Create the first account to get started.</p>
+            <div class="login-form">
+                <label for="reg-username">Username</label>
+                <input type="text" id="reg-username" autocomplete="username" placeholder="username" required>
+                <label for="reg-displayname">Display Name</label>
+                <input type="text" id="reg-displayname" placeholder="Your Name">
+                <button id="btn-register" class="btn btn-primary" onclick="registerSetup()">Register with Passkey</button>
+            </div>
+
+            {{else if .InviteMode}}
+            <h2>Welcome, {{.DisplayName}}</h2>
+            <p>Create a passkey to activate your account.</p>
+            <div class="login-form">
+                <button id="btn-register" class="btn btn-primary" onclick="registerInvite()">Create Passkey</button>
+            </div>
+
+            {{else}}
+            <h2>Sign In</h2>
+            <p>Authenticate with your passkey.</p>
+            <button id="btn-login" class="btn btn-primary" onclick="loginPasskey()">Sign in with Passkey</button>
+            {{end}}
+
+            <div id="auth-error" class="auth-error" style="display:none"></div>
+        </div>
+    </main>
+    <script>
+    function showError(msg) {
+        var el = document.getElementById('auth-error');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+
+    function bufferToBase64url(buf) {
+        var bytes = new Uint8Array(buf);
+        var str = '';
+        for (var i = 0; i < bytes.length; i++) str += String.fromCharCode(bytes[i]);
+        return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function base64urlToBuffer(b64) {
+        var s = b64.replace(/-/g, '+').replace(/_/g, '/');
+        while (s.length % 4) s += '=';
+        var raw = atob(s);
+        var buf = new Uint8Array(raw.length);
+        for (var i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+        return buf.buffer;
+    }
+
+    // Setup mode: first user picks username + display name.
+    async function registerSetup() {
+        var username = document.getElementById('reg-username').value.trim();
+        if (!username) { showError('Username is required'); return; }
+        var displayName = (document.getElementById('reg-displayname').value || '').trim() || username;
+        await doRegister({username: username, displayName: displayName}, '');
+    }
+
+    // Invite mode: user identity already set, just create passkey.
+    async function registerInvite() {
+        var token = {{if .InviteToken}}"{{.InviteToken}}"{{else}}""{{end}};
+        await doRegister({inviteToken: token}, token);
+    }
+
+    async function doRegister(beginBody, inviteToken) {
+        try {
+            var beginResp = await fetch('/auth/register/begin', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(beginBody)
+            });
+            if (!beginResp.ok) {
+                var err = await beginResp.json();
+                showError(err.error || 'Registration failed');
+                return;
+            }
+            var options = await beginResp.json();
+            var challenge = options.publicKey.challenge;
+
+            options.publicKey.challenge = base64urlToBuffer(options.publicKey.challenge);
+            options.publicKey.user.id = base64urlToBuffer(options.publicKey.user.id);
+            if (options.publicKey.excludeCredentials) {
+                options.publicKey.excludeCredentials = options.publicKey.excludeCredentials.map(function(c) {
+                    c.id = base64urlToBuffer(c.id);
+                    return c;
+                });
+            }
+
+            var credential = await navigator.credentials.create(options);
+
+            var attestationResponse = {
+                id: credential.id,
+                rawId: bufferToBase64url(credential.rawId),
+                type: credential.type,
+                response: {
+                    attestationObject: bufferToBase64url(credential.response.attestationObject),
+                    clientDataJSON: bufferToBase64url(credential.response.clientDataJSON)
+                }
+            };
+            if (credential.response.getTransports) {
+                attestationResponse.response.transports = credential.response.getTransports();
+            }
+            if (credential.response.getPublicKey) {
+                attestationResponse.response.publicKey = bufferToBase64url(credential.response.getPublicKey());
+            }
+            if (credential.response.getPublicKeyAlgorithm) {
+                attestationResponse.response.publicKeyAlgorithm = credential.response.getPublicKeyAlgorithm();
+            }
+            if (credential.response.getAuthenticatorData) {
+                attestationResponse.response.authenticatorData = bufferToBase64url(credential.response.getAuthenticatorData());
+            }
+            if (credential.authenticatorAttachment) {
+                attestationResponse.authenticatorAttachment = credential.authenticatorAttachment;
+            }
+
+            var finishURL = '/auth/register/finish?challenge=' + encodeURIComponent(challenge);
+            if (inviteToken) {
+                finishURL += '&invite=' + encodeURIComponent(inviteToken);
+            }
+            var finishResp = await fetch(finishURL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(attestationResponse)
+            });
+            if (!finishResp.ok) {
+                var err = await finishResp.json();
+                showError(err.error || 'Registration failed');
+                return;
+            }
+            window.location.href = '/';
+        } catch(e) {
+            showError('Passkey error: ' + e.message);
+        }
+    }
+
+    async function loginPasskey() {
+        try {
+            var beginResp = await fetch('/auth/login/begin', {method: 'POST'});
+            if (!beginResp.ok) {
+                var err = await beginResp.json();
+                showError(err.error || 'Login failed');
+                return;
+            }
+            var options = await beginResp.json();
+            var challenge = options.publicKey.challenge;
+
+            options.publicKey.challenge = base64urlToBuffer(options.publicKey.challenge);
+            if (options.publicKey.allowCredentials) {
+                options.publicKey.allowCredentials = options.publicKey.allowCredentials.map(function(c) {
+                    c.id = base64urlToBuffer(c.id);
+                    return c;
+                });
+            }
+
+            var assertion = await navigator.credentials.get(options);
+
+            var assertionResponse = {
+                id: assertion.id,
+                rawId: bufferToBase64url(assertion.rawId),
+                type: assertion.type,
+                response: {
+                    authenticatorData: bufferToBase64url(assertion.response.authenticatorData),
+                    clientDataJSON: bufferToBase64url(assertion.response.clientDataJSON),
+                    signature: bufferToBase64url(assertion.response.signature)
+                }
+            };
+            if (assertion.response.userHandle) {
+                assertionResponse.response.userHandle = bufferToBase64url(assertion.response.userHandle);
+            }
+            if (assertion.authenticatorAttachment) {
+                assertionResponse.authenticatorAttachment = assertion.authenticatorAttachment;
+            }
+
+            var finishResp = await fetch('/auth/login/finish?challenge=' + encodeURIComponent(challenge), {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(assertionResponse)
+            });
+            if (!finishResp.ok) {
+                var err = await finishResp.json();
+                showError(err.error || 'Login failed');
+                return;
+            }
+            window.location.href = '/';
+        } catch(e) {
+            showError('Passkey error: ' + e.message);
+        }
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{{define "control-index"}}
+<h1>Controls</h1>
+<form hx-post="/controls" class="actions">
+    <button type="submit" class="btn">New Control</button>
+</form>
+{{template "control-list" .}}
+{{template "audit-log" (dict "Entries" .AuditLog)}}
+{{end}}
+
+{{define "control-list"}}
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            <th>Identifier</th>
+            <th>Name</th>
+            <th>FAIR-CAM</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    {{range .Controls}}
+        {{template "control-row" .}}
+    {{else}}
+    <tbody><tr><td colspan="6">No controls defined yet.</td></tr></tbody>
+    {{end}}
+</table>
+{{end}}

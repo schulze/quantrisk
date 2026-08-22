@@ -1,0 +1,15 @@
+{{define "risk-row"}}
+<tbody id="risk-{{.ID}}-block">
+<tr id="risk-{{.ID}}">
+    <td><button class="toggle-btn" onclick="toggleDetail(this, '/risks/{{.ID}}/linked')">&#9654;</button></td>
+    <td><a href="/risks/{{.ID}}">{{.Identifier}}</a></td>
+    <td>{{.Scenario}}</td>
+    <td>{{printf "%.4f" .LEF}}</td>
+    <td>
+        <button hx-delete="/risks/{{.ID}}" hx-target="#risk-{{.ID}}-block" hx-swap="outerHTML"
+                hx-confirm="Delete scenario {{.Identifier}}?" class="danger">Delete</button>
+    </td>
+</tr>
+<tr class="detail-row"><td colspan="5"></td></tr>
+</tbody>
+{{end}}

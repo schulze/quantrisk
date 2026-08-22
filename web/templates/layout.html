@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - secquantrisk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/htmx.min.js"></script>
+    <script>
+    function toggleDetail(btn, url) {
+        var row = btn.closest('tr').nextElementSibling;
+        if (row.classList.contains('open')) {
+            row.classList.remove('open');
+            btn.textContent = '\u25B6';
+        } else {
+            if (!row.dataset.loaded) {
+                htmx.ajax('GET', url, {target: row.querySelector('td'), swap: 'innerHTML'});
+                row.dataset.loaded = 'true';
+            }
+            row.classList.add('open');
+            btn.textContent = '\u25BC';
+        }
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <a href="/" class="site-title">secquantrisk</a>
+    </header>
+    <nav>
+        <a href="/">dashboard</a>
+        <a href="/risks">scenarios</a>
+        <a href="/controls">controls</a>
+        <a href="/gaps">gaps</a>
+        <a href="/requirements">requirements</a>
+        <form method="POST" action="/logout" class="nav-logout"><button type="submit">logout</button></form>
+    </nav>
+    <main>
+        {{if eq .Content "index"}}
+            {{template "index-content" .Data}}
+        {{else if eq .Content "risk-index"}}
+            {{template "risk-index" .Data}}
+        {{else if eq .Content "risk-form"}}
+            {{template "risk-form" .Data}}
+        {{else if eq .Content "risk-show"}}
+            {{template "risk-show" .Data}}
+        {{else if eq .Content "simulate-results"}}
+            {{template "simulate-results" .Data}}
+        {{else if eq .Content "requirement-index"}}
+            {{template "requirement-index" .Data}}
+        {{else if eq .Content "requirement-form"}}
+            {{template "requirement-form" .Data}}
+        {{else if eq .Content "requirement-show"}}
+            {{template "requirement-show" .Data}}
+        {{else if eq .Content "control-index"}}
+            {{template "control-index" .Data}}
+        {{else if eq .Content "control-form"}}
+            {{template "control-form" .Data}}
+        {{else if eq .Content "control-show"}}
+            {{template "control-show" .Data}}
+        {{else if eq .Content "gap-index"}}
+            {{template "gap-index" .Data}}
+        {{else if eq .Content "gap-form"}}
+            {{template "gap-form" .Data}}
+        {{else if eq .Content "gap-show"}}
+            {{template "gap-show" .Data}}
+        {{end}}
+    </main>
+</body>
+</html>

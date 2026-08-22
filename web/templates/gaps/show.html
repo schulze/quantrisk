@@ -1,0 +1,65 @@
+{{define "gap-show"}}
+<h1 id="gap-title">{{.Gap.Identifier}}: {{.Gap.Name}}</h1>
+
+<div class="inline-fields">
+    <div class="inline-field">
+        <label>Identifier</label>
+        <span class="field-ro">{{.Gap.Identifier}}</span>
+    </div>
+
+    <div class="inline-field">
+        <label for="gap-name">Name</label>
+        <input type="text" id="gap-name" name="value" value="{{.Gap.Name}}"
+               hx-patch="/gaps/{{.Gap.ID}}" hx-vals='{"field":"name"}'
+               hx-trigger="change, keydown[key=='Enter']" hx-target="#gap-title" hx-swap="outerHTML"
+               placeholder="Gap name">
+    </div>
+
+    <div class="inline-field">
+        <label for="gap-desc">Description</label>
+        <textarea id="gap-desc" name="value" rows="2"
+                  hx-patch="/gaps/{{.Gap.ID}}" hx-vals='{"field":"description"}'
+                  hx-trigger="change" hx-swap="none"
+                  placeholder="Describe this gap…">{{.Gap.Description}}</textarea>
+    </div>
+
+    <div class="inline-field">
+        <label for="gap-severity">Severity</label>
+        <select id="gap-severity" name="value"
+                hx-patch="/gaps/{{.Gap.ID}}" hx-vals='{"field":"severity"}'
+                hx-trigger="change" hx-swap="none">
+            <option value="low" {{if eq .Gap.Severity "low"}}selected{{end}}>Low</option>
+            <option value="medium" {{if eq .Gap.Severity "medium"}}selected{{end}}>Medium</option>
+            <option value="high" {{if eq .Gap.Severity "high"}}selected{{end}}>High</option>
+            <option value="critical" {{if eq .Gap.Severity "critical"}}selected{{end}}>Critical</option>
+        </select>
+    </div>
+
+    <div class="inline-field">
+        <label for="gap-status">Status</label>
+        <select id="gap-status" name="value"
+                hx-patch="/gaps/{{.Gap.ID}}" hx-vals='{"field":"status"}'
+                hx-trigger="change" hx-swap="none">
+            <option value="open" {{if eq .Gap.Status "open"}}selected{{end}}>Open</option>
+            <option value="mitigated" {{if eq .Gap.Status "mitigated"}}selected{{end}}>Mitigated</option>
+            <option value="accepted" {{if eq .Gap.Status "accepted"}}selected{{end}}>Accepted</option>
+            <option value="closed" {{if eq .Gap.Status "closed"}}selected{{end}}>Closed</option>
+        </select>
+    </div>
+
+    {{if .Gap.ParentType}}
+    <div class="inline-field">
+        <label>Parent</label>
+        <span class="field-ro"><a href="/{{derefStr .Gap.ParentType}}s/{{derefInt .Gap.ParentID}}">{{if .ParentLabel}}{{.ParentLabel}}{{else}}{{derefStr .Gap.ParentType}} #{{derefInt .Gap.ParentID}}{{end}}</a></span>
+    </div>
+    {{end}}
+</div>
+
+{{template "audit-log" (dict "Entries" .AuditLog)}}
+
+<div class="actions">
+    <button hx-delete="/gaps/{{.Gap.ID}}" hx-confirm="Delete gap {{.Gap.Identifier}}?" class="danger"
+            hx-on::after-request="if(event.detail.successful) window.location='/gaps'">Delete</button>
+    <a href="/gaps" class="btn">Back to List</a>
+</div>
+{{end}}

@@ -1,0 +1,15 @@
+{{define "requirement-row"}}
+<tbody id="requirement-{{.ID}}-block">
+<tr id="requirement-{{.ID}}">
+    <td><button class="toggle-btn" onclick="toggleDetail(this, '/requirements/{{.ID}}/linked')">&#9654;</button></td>
+    <td><a href="/requirements/{{.ID}}">{{.Identifier}}</a></td>
+    <td>{{.Name}}</td>
+    <td>{{.Source}}</td>
+    <td>
+        <button hx-delete="/requirements/{{.ID}}" hx-target="#requirement-{{.ID}}-block" hx-swap="outerHTML"
+                hx-confirm="Delete requirement {{.Identifier}}?" class="danger">Delete</button>
+    </td>
+</tr>
+<tr class="detail-row"><td colspan="5"></td></tr>
+</tbody>
+{{end}}

@@ -1,0 +1,6 @@
+{{define "gap-linked"}}
+<div class="linked-detail">
+    <p><strong>Description:</strong> {{if .Gap.Description}}{{.Gap.Description}}{{else}}None{{end}}</p>
+    <p><strong>Parent:</strong> {{if .ParentLabel}}{{if .Gap.ParentType}}<a href="/{{derefStr .Gap.ParentType}}s/{{derefInt .Gap.ParentID}}">{{.ParentLabel}}</a>{{end}}{{else}}None{{end}}</p>
+</div>
+{{end}}

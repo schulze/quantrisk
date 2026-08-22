@@ -1,0 +1,10 @@
+{{define "invite-result"}}
+<div class="invite-result">
+    <p><strong>Invitation created for {{.Username}}.</strong></p>
+    <p>Share this link with them — it expires in 72 hours:</p>
+    <div class="invite-url">
+        <input type="text" value="{{.InviteURL}}" readonly onclick="this.select()" class="invite-link-input">
+        <button type="button" class="btn" onclick="navigator.clipboard.writeText(this.previousElementSibling.value).then(function(){alert('Copied!')})">Copy</button>
+    </div>
+</div>
+{{end}}

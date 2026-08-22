@@ -1,0 +1,23 @@
+{{define "control-row"}}
+<tbody id="control-{{.ID}}-block">
+<tr id="control-{{.ID}}">
+    <td><button class="toggle-btn" onclick="toggleDetail(this, '/controls/{{.ID}}/linked')">&#9654;</button></td>
+    <td><a href="/controls/{{.ID}}">{{.Identifier}}</a></td>
+    <td>{{.Name}}</td>
+    <td class="cam-badges">
+        {{range .Functions}}
+            {{$info := camLookup .Function}}
+            <span class="cam-badge cam-{{printf "%s" $info.Domain}}" title="{{$info.Name}}">{{$info.Name}}</span>
+        {{else}}
+            <span class="cam-none">—</span>
+        {{end}}
+    </td>
+    <td>{{.Status}}</td>
+    <td>
+        <button hx-delete="/controls/{{.ID}}" hx-target="#control-{{.ID}}-block" hx-swap="outerHTML"
+                hx-confirm="Delete control {{.Identifier}}?" class="danger">Delete</button>
+    </td>
+</tr>
+<tr class="detail-row"><td colspan="6"></td></tr>
+</tbody>
+{{end}}

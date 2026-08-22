@@ -1,0 +1,17 @@
+{{define "gap-row"}}
+<tbody id="gap-{{.ID}}-block">
+<tr id="gap-{{.ID}}">
+    <td><button class="toggle-btn" onclick="toggleDetail(this, '/gaps/{{.ID}}/linked')">&#9654;</button></td>
+    <td><a href="/gaps/{{.ID}}">{{.Identifier}}</a></td>
+    <td>{{.Name}}</td>
+    <td>{{.Severity}}</td>
+    <td>{{.Status}}</td>
+    <td>{{if .ParentType}}<a href="/{{derefStr .ParentType}}s/{{derefInt .ParentID}}">{{derefStr .ParentType}}</a>{{else}}—{{end}}</td>
+    <td>
+        <button hx-delete="/gaps/{{.ID}}" hx-target="#gap-{{.ID}}-block" hx-swap="outerHTML"
+                hx-confirm="Delete gap {{.Identifier}}?" class="danger">Delete</button>
+    </td>
+</tr>
+<tr class="detail-row"><td colspan="7"></td></tr>
+</tbody>
+{{end}}

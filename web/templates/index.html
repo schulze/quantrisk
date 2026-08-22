@@ -1,0 +1,60 @@
+{{define "index-content"}}
+<h1>Dashboard</h1>
+
+<section class="dashboard-section">
+    <div class="section-header">
+        <h2>Loss Event Scenarios</h2>
+        <form hx-post="/risks" class="actions">
+            <button type="submit" class="btn">New Scenario</button>
+        </form>
+    </div>
+    <button class="btn" hx-post="/simulate" hx-target="#simulate-results">
+        Run Simulation
+    </button>
+    <div id="simulate-results"></div>
+    {{template "risk-list" .}}
+</section>
+
+<section class="dashboard-section">
+    <div class="section-header">
+        <h2>Controls</h2>
+        <form hx-post="/controls" class="actions">
+            <button type="submit" class="btn">New Control</button>
+        </form>
+    </div>
+    {{template "control-list" .}}
+</section>
+
+<section class="dashboard-section">
+    <div class="section-header">
+        <h2>Gaps</h2>
+    </div>
+    <p class="hint">Gaps are created from Control or Requirement pages.</p>
+    {{template "gap-list" .}}
+</section>
+
+<section class="dashboard-section">
+    <div class="section-header">
+        <h2>Control Requirements</h2>
+        <form hx-post="/requirements" class="actions">
+            <button type="submit" class="btn">New Requirement</button>
+        </form>
+    </div>
+    {{template "requirement-list" .}}
+</section>
+
+<section class="dashboard-section">
+    <div class="section-header">
+        <h2>Invite User</h2>
+    </div>
+    <p class="hint">Create an invitation link for a new user. They will use it to register their own passkey.</p>
+    <form hx-post="/invitations" hx-target="#invite-result" hx-swap="innerHTML" class="inline-form">
+        <label for="invite-username">Username</label>
+        <input type="text" id="invite-username" name="username" placeholder="username" required>
+        <label for="invite-displayname">Display Name</label>
+        <input type="text" id="invite-displayname" name="display_name" placeholder="Display Name">
+        <button type="submit" class="btn">Create Invitation</button>
+    </form>
+    <div id="invite-result"></div>
+</section>
+{{end}}

@@ -1,0 +1,5 @@
+{{define "risk-linked"}}
+<div class="linked-detail">
+    <p><strong>Controls:</strong> {{if .Controls}}{{range $i, $c := .Controls}}{{if $i}}, {{end}}<a href="/controls/{{$c.ID}}">{{$c.Identifier}}</a>{{end}}{{else}}None{{end}}</p>
+</div>
+{{end}}

@@ -1,0 +1,17 @@
+[Unit]
+Description=secquantrisk web server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_SERVICE_USER
+Group=YOUR_SERVICE_GROUP
+ExecStart=/usr/local/bin/quantriskd -db /var/lib/secquantrisk/secquantrisk.db -addr :8000 -origin https://secquantrisk.example.com
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,41 @@
+{{define "simulate-results"}}
+<div class="card">
+    <h2>Simulation Results ({{.Years}} years)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Identifier</th>
+                <th>Name</th>
+                <th>Annualized Loss</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Priorities}}
+            <tr>
+                <td>{{.Identifier}}</td>
+                <td>{{.Name}}</td>
+                <td>{{printf "%.2f" .Loss}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+    <div class="actions">
+        <img src="/simulate/lec?years={{.Years}}" alt="Loss Exceedance Curve" style="max-width:100%">
+    </div>
+</div>
+{{end}}
+
+{{define "risk-simulate-results"}}
+<div class="card">
+    <h3>Simulation: {{.Risk.Identifier}}</h3>
+    <table>
+        <thead>
+            <tr><th>Metric</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Annualized Loss Expectancy</td><td>{{printf "$%.2f" .AnnualLoss}}</td></tr>
+        </tbody>
+    </table>
+    <img src="/risks/{{.Risk.ID}}/lec" alt="Loss Exceedance Curve" style="max-width:100%">
+</div>
+{{end}}

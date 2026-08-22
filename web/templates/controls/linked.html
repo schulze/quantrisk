@@ -1,0 +1,7 @@
+{{define "control-linked"}}
+<div class="linked-detail">
+    <p><strong>Risks:</strong> {{if .Risks}}{{range $i, $r := .Risks}}{{if $i}}, {{end}}<a href="/risks/{{$r.ID}}">{{$r.Identifier}}</a>{{end}}{{else}}None{{end}}</p>
+    <p><strong>Requirements:</strong> {{if .Requirements}}{{range $i, $r := .Requirements}}{{if $i}}, {{end}}<a href="/requirements/{{$r.ID}}">{{$r.Identifier}}</a>{{end}}{{else}}None{{end}}</p>
+    <p><strong>Gaps:</strong> {{if .Gaps}}{{range $i, $g := .Gaps}}{{if $i}}, {{end}}<a href="/gaps/{{$g.ID}}">{{$g.Identifier}}</a>{{end}}{{else}}None{{end}}</p>
+</div>
+{{end}}

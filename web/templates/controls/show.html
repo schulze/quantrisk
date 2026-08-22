@@ -1,0 +1,264 @@
+{{define "control-show"}}
+<h1 id="control-title">{{.Control.Identifier}}: {{.Control.Name}}</h1>
+
+<div class="inline-fields">
+    <div class="inline-field">
+        <label>Identifier</label>
+        <span class="field-ro">{{.Control.Identifier}}</span>
+    </div>
+
+    <div class="inline-field">
+        <label for="ctl-name">Name</label>
+        <input type="text" id="ctl-name" name="value" value="{{.Control.Name}}"
+               hx-patch="/controls/{{.Control.ID}}" hx-vals='{"field":"name"}'
+               hx-trigger="change, keydown[key=='Enter']" hx-target="#control-title" hx-swap="outerHTML"
+               hx-indicator="#save-ind-name" placeholder="Control name">
+        <span id="save-ind-name" class="field-saved htmx-indicator">✓</span>
+    </div>
+
+    <div class="inline-field">
+        <label for="ctl-desc">Description</label>
+        <textarea id="ctl-desc" name="value" rows="2"
+                  hx-patch="/controls/{{.Control.ID}}" hx-vals='{"field":"description"}'
+                  hx-trigger="change" hx-swap="none"
+                  hx-indicator="#save-ind-desc" placeholder="Describe this control…">{{.Control.Description}}</textarea>
+        <span id="save-ind-desc" class="field-saved htmx-indicator">✓</span>
+    </div>
+
+    <div class="inline-field">
+        <label for="ctl-status">Status</label>
+        <select id="ctl-status" name="value"
+                hx-patch="/controls/{{.Control.ID}}" hx-vals='{"field":"status"}'
+                hx-trigger="change" hx-swap="none"
+                hx-indicator="#save-ind-status">
+            <option value="planned" {{if eq .Control.Status "planned"}}selected{{end}}>Planned</option>
+            <option value="implemented" {{if eq .Control.Status "implemented"}}selected{{end}}>Implemented</option>
+            <option value="verified" {{if eq .Control.Status "verified"}}selected{{end}}>Verified</option>
+            <option value="ineffective" {{if eq .Control.Status "ineffective"}}selected{{end}}>Ineffective</option>
+        </select>
+        <span id="save-ind-status" class="field-saved htmx-indicator">✓</span>
+    </div>
+</div>
+
+<h3>FAIR-CAM Functions</h3>
+<p class="hint">Control functions describe <em>how</em> this control affects risk, per the FAIR Controls Analytics Model.</p>
+{{if .Control.Functions}}
+<table class="cam-table">
+    <thead>
+        <tr>
+            <th>Domain</th>
+            <th>Function</th>
+            <th>Capability</th>
+            <th>Coverage</th>
+            <th>Reliability</th>
+            <th>Overall</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    {{range .Control.Functions}}
+    {{$info := camLookup .Function}}
+    <tr>
+        <td><span class="cam-badge cam-{{printf "%s" $info.Domain}}">{{printf "%s" $info.Domain}}</span></td>
+        <td>
+            <strong>{{$info.Name}}</strong>
+            <div class="cam-fn-path">{{printf "%s" .Function}}</div>
+            {{if .Notes}}<div class="cam-notes">{{.Notes}}</div>{{end}}
+        </td>
+        <td>{{printf "%.0f%%" (mul .Effectiveness.Capability.ML 100)}}</td>
+        <td>{{printf "%.0f%%" (mul .Effectiveness.Coverage.ML 100)}}</td>
+        <td>{{printf "%.0f%%" (mul .Effectiveness.Reliability.ML 100)}}</td>
+        <td>{{printf "%.1f%%" (mul .Effectiveness.OverallMid 100)}}</td>
+        <td>
+            <button hx-delete="/controls/{{$.Control.ID}}/functions/{{.ID}}"
+                    hx-target="closest tr" hx-swap="outerHTML"
+                    hx-confirm="Remove {{$info.Name}} function?" class="danger">Remove</button>
+        </td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{else}}
+<p>No FAIR-CAM functions assigned yet.</p>
+{{end}}
+
+<details class="cam-add-form">
+    <summary class="btn">Assign Function</summary>
+    <form hx-post="/controls/{{.Control.ID}}/functions" class="fair-form">
+        <label for="function">FAIR-CAM Function</label>
+        <select id="function" name="function" required>
+            <option value="">Select a function…</option>
+            <optgroup label="LEC — Loss Event Controls">
+                <optgroup label="Prevention (OR)">
+                {{range camDomainFunctions "LEC"}}
+                    {{if eq .Parent "LEC.Prevention"}}
+                    <option value="{{printf "%s" .Function}}">{{.Name}} — {{.Description}}</option>
+                    {{end}}
+                {{end}}
+                </optgroup>
+                <optgroup label="Detection (AND)">
+                {{range camDomainFunctions "LEC"}}
+                    {{if eq .Parent "LEC.Detection"}}
+                    <option value="{{printf "%s" .Function}}">{{.Name}} — {{.Description}}</option>
+                    {{end}}
+                {{end}}
+                </optgroup>
+                <optgroup label="Response (WeakAND)">
+                {{range camDomainFunctions "LEC"}}
+                    {{if eq .Parent "LEC.Response"}}
+                    <option value="{{printf "%s" .Function}}">{{.Name}} — {{.Description}}</option>
+                    {{end}}
+                {{end}}
+                </optgroup>
+            </optgroup>
+            <optgroup label="VMC — Variance Management Controls">
+                <optgroup label="Prevention (OR)">
+                {{range camDomainFunctions "VMC"}}
+                    {{if eq .Parent "VMC.Prevention"}}
+                    <option value="{{printf "%s" .Function}}">{{.Name}} — {{.Description}}</option>
+                    {{end}}
+                {{end}}
+                </optgroup>
+                <optgroup label="Identification (AND)">
+                {{range camDomainFunctions "VMC"}}
+                    {{if eq .Parent "VMC.Identification"}}
+                    <option value="{{printf "%s" .Function}}">{{.Name}} — {{.Description}}</option>
+                    {{end}}
+                {{end}}
+                </optgroup>
+                <optgroup label="Correction (AND)">
+                {{range camDomainFunctions "VMC"}}
+                    {{if eq .Parent "VMC.Correction"}}
+                    <option value="{{printf "%s" .Function}}">{{.Name}} — {{.Description}}</option>
+                    {{end}}
+                {{end}}
+                </optgroup>
+            </optgroup>
+            <optgroup label="DSC — Decision Support Controls">
+                <optgroup label="Prevention (AND)">
+                {{range camDomainFunctions "DSC"}}
+                    {{if eq .Parent "DSC.Prevention"}}
+                    <option value="{{printf "%s" .Function}}">{{.Name}} — {{.Description}}</option>
+                    {{end}}
+                {{end}}
+                </optgroup>
+                <optgroup label="Identification">
+                {{range camDomainFunctions "DSC"}}
+                    {{if eq .Parent "DSC.Identification"}}
+                    <option value="{{printf "%s" .Function}}">{{.Name}} — {{.Description}}</option>
+                    {{end}}
+                {{end}}
+                </optgroup>
+                <optgroup label="Correction">
+                {{range camDomainFunctions "DSC"}}
+                    {{if eq .Parent "DSC.Correction"}}
+                    <option value="{{printf "%s" .Function}}">{{.Name}} — {{.Description}}</option>
+                    {{end}}
+                {{end}}
+                </optgroup>
+            </optgroup>
+        </select>
+
+        <fieldset>
+            <legend>Operational Effectiveness</legend>
+            <p class="hint">Rate Capability, Coverage, and Reliability as probabilities (0–1). Use three-point estimates.</p>
+
+            {{template "estimate-fields" dict "Label" "Capability (0–1)" "Prefix" "cap" "E" .ZeroEstimate}}
+            {{template "estimate-fields" dict "Label" "Coverage (0–1)" "Prefix" "cov" "E" .ZeroEstimate}}
+            {{template "estimate-fields" dict "Label" "Reliability (0–1)" "Prefix" "rel" "E" .ZeroEstimate}}
+        </fieldset>
+
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" rows="2" placeholder="How does this control serve this function?"></textarea>
+
+        <div class="actions">
+            <button type="submit" class="btn">Assign Function</button>
+        </div>
+    </form>
+</details>
+
+<h3>Linked Scenarios</h3>
+{{if .Risks}}
+<table>
+    <thead><tr><th>Identifier</th><th>Scenario</th><th></th></tr></thead>
+    <tbody>
+    {{range .Risks}}
+    <tr>
+        <td><a href="/risks/{{.ID}}">{{.Identifier}}</a></td>
+        <td>{{.Scenario}}</td>
+        <td><button hx-delete="/controls/{{$.Control.ID}}/risks/{{.ID}}" hx-target="closest tr" hx-swap="outerHTML" class="danger">Unlink</button></td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{else}}
+<p>No linked risks.</p>
+{{end}}
+{{if .AllRisks}}
+<form class="link-form" hx-post="/controls/{{.Control.ID}}/risks">
+    <select name="risk_id">
+        <option value="">Select a risk...</option>
+        {{range .AllRisks}}<option value="{{.ID}}">{{.Identifier}}: {{.Scenario}}</option>{{end}}
+    </select>
+    <button type="submit" class="btn">Link Risk</button>
+</form>
+{{end}}
+
+<h3>Linked Requirements</h3>
+{{if .Requirements}}
+<table>
+    <thead><tr><th>Identifier</th><th>Name</th><th></th></tr></thead>
+    <tbody>
+    {{range .Requirements}}
+    <tr>
+        <td><a href="/requirements/{{.ID}}">{{.Identifier}}</a></td>
+        <td>{{.Name}}</td>
+        <td><button hx-delete="/controls/{{$.Control.ID}}/requirements/{{.ID}}" hx-target="closest tr" hx-swap="outerHTML" class="danger">Unlink</button></td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{else}}
+<p>No linked requirements.</p>
+{{end}}
+{{if .AllRequirements}}
+<form class="link-form" hx-post="/controls/{{.Control.ID}}/requirements">
+    <select name="requirement_id">
+        <option value="">Select a requirement...</option>
+        {{range .AllRequirements}}<option value="{{.ID}}">{{.Identifier}}: {{.Name}}</option>{{end}}
+    </select>
+    <button type="submit" class="btn">Link Requirement</button>
+</form>
+{{end}}
+
+<h3>Gaps</h3>
+{{if .Gaps}}
+<table>
+    <thead><tr><th>Identifier</th><th>Name</th><th>Severity</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {{range .Gaps}}
+    <tr>
+        <td><a href="/gaps/{{.ID}}">{{.Identifier}}</a></td>
+        <td>{{.Name}}</td>
+        <td>{{.Severity}}</td>
+        <td>{{.Status}}</td>
+        <td><button hx-delete="/gaps/{{.ID}}" hx-target="closest tr" hx-swap="outerHTML" hx-confirm="Delete gap {{.Identifier}}?" class="danger">Delete</button></td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{else}}
+<p>No gaps.</p>
+{{end}}
+<form class="link-form" hx-post="/controls/{{.Control.ID}}/gaps">
+    <button type="submit" class="btn">New Gap</button>
+</form>
+
+{{template "audit-log" (dict "Entries" .AuditLog)}}
+
+<div class="actions">
+    <button hx-delete="/controls/{{.Control.ID}}" hx-confirm="Delete control {{.Control.Identifier}}?" class="danger"
+            hx-on::after-request="if(event.detail.successful) window.location='/controls'">Delete</button>
+    <a href="/controls" class="btn">Back to List</a>
+</div>
+{{end}}

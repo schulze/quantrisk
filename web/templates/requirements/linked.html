@@ -1,0 +1,6 @@
+{{define "requirement-linked"}}
+<div class="linked-detail">
+    <p><strong>Controls:</strong> {{if .Controls}}{{range $i, $c := .Controls}}{{if $i}}, {{end}}<a href="/controls/{{$c.ID}}">{{$c.Identifier}}</a>{{end}}{{else}}None{{end}}</p>
+    <p><strong>Gaps:</strong> {{if .Gaps}}{{range $i, $g := .Gaps}}{{if $i}}, {{end}}<a href="/gaps/{{$g.ID}}">{{$g.Identifier}}</a>{{end}}{{else}}None{{end}}</p>
+</div>
+{{end}}

@@ -1,0 +1,159 @@
+{{define "estimate-row"}}
+<tr>
+    <td>{{.Label}}</td>
+    <td>{{printf "%.2f" .E.Min}}</td>
+    <td>{{printf "%.2f" .E.ML}}</td>
+    <td>{{printf "%.2f" .E.Max}}</td>
+    <td class="rationale">{{.E.Rationale}}</td>
+</tr>
+{{end}}
+
+{{define "money-row"}}
+<tr>
+    <td>{{.Label}}</td>
+    <td>{{printf "$%.0f" .E.Min}}</td>
+    <td>{{printf "$%.0f" .E.ML}}</td>
+    <td>{{printf "$%.0f" .E.Max}}</td>
+    <td class="rationale">{{.E.Rationale}}</td>
+</tr>
+{{end}}
+
+{{define "risk-show"}}
+<h1 id="risk-title">{{.Risk.Identifier}}: {{.Risk.Scenario}}</h1>
+
+<div class="inline-fields">
+    <div class="inline-field">
+        <label>Identifier</label>
+        <span class="field-ro">{{.Risk.Identifier}}</span>
+    </div>
+
+    <div class="inline-field">
+        <label for="risk-scenario">Scenario</label>
+        <textarea id="risk-scenario" name="value" rows="2"
+                  hx-patch="/risks/{{.Risk.ID}}" hx-vals='{"field":"scenario"}'
+                  hx-trigger="change" hx-target="#risk-title" hx-swap="outerHTML"
+                  hx-indicator="#save-ind-scenario"
+                  placeholder="Describe the loss event scenario…">{{.Risk.Scenario}}</textarea>
+        <span id="save-ind-scenario" class="field-saved htmx-indicator">✓</span>
+    </div>
+</div>
+
+<details class="fair-edit-section" {{if .FreshRisk}}open{{end}}>
+    <summary class="btn">FAIR Model</summary>
+    <form hx-put="/risks/{{.Risk.ID}}" class="fair-form">
+        <input type="hidden" name="identifier" value="{{.Risk.Identifier}}">
+        <input type="hidden" name="scenario" value="{{.Risk.Scenario}}">
+
+        <fieldset>
+            <legend>Loss Event Frequency (LEF)</legend>
+
+            <div class="lef-mode-toggle">
+                <label>
+                    <input type="radio" name="lef_mode" value="decomposed"
+                        {{if ne (printf "%s" .Risk.LEFMode) "direct"}}checked{{end}}
+                        onchange="toggleLEFMode()"> Decompose into TEF × Susceptibility
+                </label>
+                <label>
+                    <input type="radio" name="lef_mode" value="direct"
+                        {{if eq (printf "%s" .Risk.LEFMode) "direct"}}checked{{end}}
+                        onchange="toggleLEFMode()"> Estimate LEF directly
+                </label>
+            </div>
+
+            <div id="lef-direct" class="lef-section">
+                {{template "estimate-fields" dict "Label" "Loss Event Frequency (events/year)" "Prefix" "lef" "E" .Risk.DirectLEF}}
+            </div>
+
+            <div id="lef-decomposed" class="lef-section">
+                <p class="hint">LEF = TEF × Susceptibility. Estimate each factor as a three-point range.</p>
+                {{template "estimate-fields" dict "Label" "Threat Event Frequency (events/year)" "Prefix" "tef" "E" .Risk.TEF}}
+                {{template "estimate-fields" dict "Label" "Susceptibility (0–1)" "Prefix" "susc" "E" .Risk.Susc}}
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Primary Loss (PL)</legend>
+            <p class="hint">Direct losses from the event. Monetary values.</p>
+
+            {{template "estimate-fields" dict "Label" "Productivity Loss" "Prefix" "pl_prodl" "E" .Risk.PL.ProdL}}
+            {{template "estimate-fields" dict "Label" "Response Costs" "Prefix" "pl_respc" "E" .Risk.PL.RespC}}
+            {{template "estimate-fields" dict "Label" "Replacement Costs" "Prefix" "pl_replc" "E" .Risk.PL.ReplC}}
+            {{template "estimate-fields" dict "Label" "Fines & Judgments" "Prefix" "pl_finju" "E" .Risk.PL.FinJu}}
+            {{template "estimate-fields" dict "Label" "Reputation Damage" "Prefix" "pl_repud" "E" .Risk.PL.RepuD}}
+            {{template "estimate-fields" dict "Label" "Competitive Advantage Loss" "Prefix" "pl_cadvl" "E" .Risk.PL.CAdvL}}
+        </fieldset>
+
+        <fieldset>
+            <legend>Secondary Loss (SL)</legend>
+            <p class="hint">Indirect "fallout" losses from secondary stakeholder reactions.</p>
+
+            {{template "estimate-fields" dict "Label" "Productivity Loss" "Prefix" "sl_prodl" "E" .Risk.SL.ProdL}}
+            {{template "estimate-fields" dict "Label" "Response Costs" "Prefix" "sl_respc" "E" .Risk.SL.RespC}}
+            {{template "estimate-fields" dict "Label" "Replacement Costs" "Prefix" "sl_replc" "E" .Risk.SL.ReplC}}
+            {{template "estimate-fields" dict "Label" "Fines & Judgments" "Prefix" "sl_finju" "E" .Risk.SL.FinJu}}
+            {{template "estimate-fields" dict "Label" "Reputation Damage" "Prefix" "sl_repud" "E" .Risk.SL.RepuD}}
+            {{template "estimate-fields" dict "Label" "Competitive Advantage Loss" "Prefix" "sl_cadvl" "E" .Risk.SL.CAdvL}}
+        </fieldset>
+
+        <div class="actions">
+            <button type="submit" class="btn">Save FAIR Model</button>
+        </div>
+    </form>
+</details>
+
+<script>
+function toggleLEFMode() {
+    var mode = document.querySelector('input[name="lef_mode"]:checked').value;
+    var directEl = document.getElementById('lef-direct');
+    var decompEl = document.getElementById('lef-decomposed');
+    if (mode === 'direct') {
+        directEl.classList.remove('lef-disabled');
+        decompEl.classList.add('lef-disabled');
+        decompEl.querySelectorAll('input, textarea').forEach(function(el) { el.disabled = true; });
+        directEl.querySelectorAll('input, textarea').forEach(function(el) { el.disabled = false; });
+    } else {
+        decompEl.classList.remove('lef-disabled');
+        directEl.classList.add('lef-disabled');
+        directEl.querySelectorAll('input, textarea').forEach(function(el) { el.disabled = true; });
+        decompEl.querySelectorAll('input, textarea').forEach(function(el) { el.disabled = false; });
+    }
+}
+// Run on page load and also after HTMX swaps
+document.addEventListener('DOMContentLoaded', function() { if (document.getElementById('lef-direct')) toggleLEFMode(); });
+document.body.addEventListener('htmx:afterSwap', function() { if (document.getElementById('lef-direct')) toggleLEFMode(); });
+// Also run when the details is opened
+document.addEventListener('toggle', function(e) { if (e.target.classList && e.target.classList.contains('fair-edit-section') && document.getElementById('lef-direct')) toggleLEFMode(); }, true);
+</script>
+
+<h3>Mitigating Controls</h3>
+{{if .Controls}}
+<table>
+    <thead><tr><th>Identifier</th><th>Name</th><th>Status</th></tr></thead>
+    <tbody>
+    {{range .Controls}}
+    <tr>
+        <td><a href="/controls/{{.ID}}">{{.Identifier}}</a></td>
+        <td>{{.Name}}</td>
+        <td>{{.Status}}</td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{else}}
+<p>No mitigating controls linked yet.</p>
+{{end}}
+
+<h3>Simulation</h3>
+<button class="btn" hx-post="/risks/{{.Risk.ID}}/simulate" hx-target="#risk-sim-results" hx-swap="innerHTML">
+    Run Simulation
+</button>
+<div id="risk-sim-results"></div>
+
+{{template "audit-log" (dict "Entries" .AuditLog)}}
+
+<div class="actions">
+    <button hx-delete="/risks/{{.Risk.ID}}" hx-confirm="Delete scenario {{.Risk.Identifier}}?" class="danger"
+            hx-on::after-request="if(event.detail.successful) window.location='/risks'">Delete</button>
+    <a href="/risks" class="btn">Back to List</a>
+</div>
+{{end}}

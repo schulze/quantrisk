@@ -1,0 +1,32 @@
+services:
+  quantriskd:
+    build:
+      context: ../..
+      dockerfile: test/integration/Dockerfile
+    command: ["quantriskd", "-db", "/data/quantrisk.db", "-addr", ":8000"]
+    ports:
+      - "${HOST_PORT:-9000}:8000"
+    volumes:
+      - dbdata:/data
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/login"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+
+  seed:
+    build:
+      context: ../..
+      dockerfile: test/integration/Dockerfile
+    command: ["seed.sh"]
+    depends_on:
+      quantriskd:
+        condition: service_healthy
+    volumes:
+      - dbdata:/data
+    environment:
+      - DB_PATH=/data/quantrisk.db
+      - SERVER_URL=http://quantriskd:8000
+
+volumes:
+  dbdata:

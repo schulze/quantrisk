@@ -1,0 +1,96 @@
+{{define "estimate-fields"}}
+<div class="estimate-group">
+    <label>{{.Label}}</label>
+    <div class="estimate-inputs">
+        <div><span class="input-label">Min</span><input type="number" name="{{.Prefix}}_min" value="{{.E.Min}}" step="any" min="0" placeholder="Min"></div>
+        <div><span class="input-label">Most Likely</span><input type="number" name="{{.Prefix}}_ml" value="{{.E.ML}}" step="any" min="0" placeholder="ML"></div>
+        <div><span class="input-label">Max</span><input type="number" name="{{.Prefix}}_max" value="{{.E.Max}}" step="any" min="0" placeholder="Max"></div>
+    </div>
+    <textarea name="{{.Prefix}}_rationale" rows="2" placeholder="Rationale…">{{.E.Rationale}}</textarea>
+</div>
+{{end}}
+
+{{define "risk-form"}}
+<h2>Edit FAIR Model — {{.Risk.Identifier}}</h2>
+<form hx-put="/risks/{{.Risk.ID}}" class="fair-form">
+    <input type="hidden" name="identifier" value="{{.Risk.Identifier}}">
+
+    <input type="hidden" name="scenario" value="{{.Risk.Scenario}}">
+
+    <fieldset>
+        <legend>Loss Event Frequency (LEF)</legend>
+
+        <div class="lef-mode-toggle">
+            <label>
+                <input type="radio" name="lef_mode" value="decomposed"
+                    {{if ne (printf "%s" .Risk.LEFMode) "direct"}}checked{{end}}
+                    onchange="toggleLEFMode()"> Decompose into TEF × Susceptibility
+            </label>
+            <label>
+                <input type="radio" name="lef_mode" value="direct"
+                    {{if eq (printf "%s" .Risk.LEFMode) "direct"}}checked{{end}}
+                    onchange="toggleLEFMode()"> Estimate LEF directly
+            </label>
+        </div>
+
+        <div id="lef-direct" class="lef-section">
+            {{template "estimate-fields" dict "Label" "Loss Event Frequency (events/year)" "Prefix" "lef" "E" .Risk.DirectLEF}}
+        </div>
+
+        <div id="lef-decomposed" class="lef-section">
+            <p class="hint">LEF = TEF × Susceptibility. Estimate each factor as a three-point range.</p>
+            {{template "estimate-fields" dict "Label" "Threat Event Frequency (events/year)" "Prefix" "tef" "E" .Risk.TEF}}
+            {{template "estimate-fields" dict "Label" "Susceptibility (0–1)" "Prefix" "susc" "E" .Risk.Susc}}
+        </div>
+    </fieldset>
+
+    <script>
+    function toggleLEFMode() {
+        var mode = document.querySelector('input[name="lef_mode"]:checked').value;
+        var directEl = document.getElementById('lef-direct');
+        var decompEl = document.getElementById('lef-decomposed');
+        if (mode === 'direct') {
+            directEl.classList.remove('lef-disabled');
+            decompEl.classList.add('lef-disabled');
+            decompEl.querySelectorAll('input, textarea').forEach(function(el) { el.disabled = true; });
+            directEl.querySelectorAll('input, textarea').forEach(function(el) { el.disabled = false; });
+        } else {
+            decompEl.classList.remove('lef-disabled');
+            directEl.classList.add('lef-disabled');
+            directEl.querySelectorAll('input, textarea').forEach(function(el) { el.disabled = true; });
+            decompEl.querySelectorAll('input, textarea').forEach(function(el) { el.disabled = false; });
+        }
+    }
+    document.addEventListener('DOMContentLoaded', toggleLEFMode);
+    </script>
+
+    <fieldset>
+        <legend>Primary Loss (PL)</legend>
+        <p class="hint">Direct losses from the event. Monetary values.</p>
+
+        {{template "estimate-fields" dict "Label" "Productivity Loss" "Prefix" "pl_prodl" "E" .Risk.PL.ProdL}}
+        {{template "estimate-fields" dict "Label" "Response Costs" "Prefix" "pl_respc" "E" .Risk.PL.RespC}}
+        {{template "estimate-fields" dict "Label" "Replacement Costs" "Prefix" "pl_replc" "E" .Risk.PL.ReplC}}
+        {{template "estimate-fields" dict "Label" "Fines & Judgments" "Prefix" "pl_finju" "E" .Risk.PL.FinJu}}
+        {{template "estimate-fields" dict "Label" "Reputation Damage" "Prefix" "pl_repud" "E" .Risk.PL.RepuD}}
+        {{template "estimate-fields" dict "Label" "Competitive Advantage Loss" "Prefix" "pl_cadvl" "E" .Risk.PL.CAdvL}}
+    </fieldset>
+
+    <fieldset>
+        <legend>Secondary Loss (SL)</legend>
+        <p class="hint">Indirect “fallout” losses from secondary stakeholder reactions.</p>
+
+        {{template "estimate-fields" dict "Label" "Productivity Loss" "Prefix" "sl_prodl" "E" .Risk.SL.ProdL}}
+        {{template "estimate-fields" dict "Label" "Response Costs" "Prefix" "sl_respc" "E" .Risk.SL.RespC}}
+        {{template "estimate-fields" dict "Label" "Replacement Costs" "Prefix" "sl_replc" "E" .Risk.SL.ReplC}}
+        {{template "estimate-fields" dict "Label" "Fines & Judgments" "Prefix" "sl_finju" "E" .Risk.SL.FinJu}}
+        {{template "estimate-fields" dict "Label" "Reputation Damage" "Prefix" "sl_repud" "E" .Risk.SL.RepuD}}
+        {{template "estimate-fields" dict "Label" "Competitive Advantage Loss" "Prefix" "sl_cadvl" "E" .Risk.SL.CAdvL}}
+    </fieldset>
+
+    <div class="actions">
+        <button type="submit" class="btn">Save</button>
+        <a href="/risks/{{.Risk.ID}}" class="btn">Cancel</a>
+    </div>
+</form>
+{{end}}

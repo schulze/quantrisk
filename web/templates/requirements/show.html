@@ -1,0 +1,93 @@
+{{define "requirement-show"}}
+<h1 id="req-title">{{.Requirement.Identifier}}: {{.Requirement.Name}}</h1>
+
+<div class="inline-fields">
+    <div class="inline-field">
+        <label>Identifier</label>
+        <span class="field-ro">{{.Requirement.Identifier}}</span>
+    </div>
+
+    <div class="inline-field">
+        <label for="req-name">Name</label>
+        <input type="text" id="req-name" name="value" value="{{.Requirement.Name}}"
+               hx-patch="/requirements/{{.Requirement.ID}}" hx-vals='{"field":"name"}'
+               hx-trigger="change, keydown[key=='Enter']" hx-target="#req-title" hx-swap="outerHTML"
+               placeholder="Requirement name">
+    </div>
+
+    <div class="inline-field">
+        <label for="req-desc">Description</label>
+        <textarea id="req-desc" name="value" rows="2"
+                  hx-patch="/requirements/{{.Requirement.ID}}" hx-vals='{"field":"description"}'
+                  hx-trigger="change" hx-swap="none"
+                  placeholder="Describe this requirement…">{{.Requirement.Description}}</textarea>
+    </div>
+
+    <div class="inline-field">
+        <label for="req-source">Source</label>
+        <input type="text" id="req-source" name="value" value="{{.Requirement.Source}}"
+               hx-patch="/requirements/{{.Requirement.ID}}" hx-vals='{"field":"source"}'
+               hx-trigger="change, keydown[key=='Enter']" hx-swap="none"
+               placeholder="e.g. ISO 27001, NIST CSF">
+    </div>
+</div>
+
+<h3>Implementing Controls</h3>
+{{if .Controls}}
+<table>
+    <thead><tr><th>Identifier</th><th>Name</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {{range .Controls}}
+    <tr>
+        <td><a href="/controls/{{.ID}}">{{.Identifier}}</a></td>
+        <td>{{.Name}}</td>
+        <td>{{.Status}}</td>
+        <td><button hx-delete="/requirements/{{$.Requirement.ID}}/controls/{{.ID}}" hx-target="closest tr" hx-swap="outerHTML" class="danger">Unlink</button></td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{else}}
+<p>No linked controls.</p>
+{{end}}
+{{if .AllControls}}
+<form class="link-form" hx-post="/requirements/{{.Requirement.ID}}/controls">
+    <select name="control_id">
+        <option value="">Select a control...</option>
+        {{range .AllControls}}<option value="{{.ID}}">{{.Identifier}}: {{.Name}}</option>{{end}}
+    </select>
+    <button type="submit" class="btn">Link Control</button>
+</form>
+{{end}}
+
+<h3>Gaps</h3>
+{{if .Gaps}}
+<table>
+    <thead><tr><th>Identifier</th><th>Name</th><th>Severity</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {{range .Gaps}}
+    <tr>
+        <td><a href="/gaps/{{.ID}}">{{.Identifier}}</a></td>
+        <td>{{.Name}}</td>
+        <td>{{.Severity}}</td>
+        <td>{{.Status}}</td>
+        <td><button hx-delete="/gaps/{{.ID}}" hx-target="closest tr" hx-swap="outerHTML" hx-confirm="Delete gap {{.Identifier}}?" class="danger">Delete</button></td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>
+{{else}}
+<p>No gaps.</p>
+{{end}}
+<form class="link-form" hx-post="/requirements/{{.Requirement.ID}}/gaps">
+    <button type="submit" class="btn">New Gap</button>
+</form>
+
+{{template "audit-log" (dict "Entries" .AuditLog)}}
+
+<div class="actions">
+    <button hx-delete="/requirements/{{.Requirement.ID}}" hx-confirm="Delete requirement {{.Requirement.Identifier}}?" class="danger"
+            hx-on::after-request="if(event.detail.successful) window.location='/requirements'">Delete</button>
+    <a href="/requirements" class="btn">Back to List</a>
+</div>
+{{end}}

@@ -1,0 +1,27 @@
+{{define "requirement-index"}}
+<h1>Requirements</h1>
+<form hx-post="/requirements" class="actions">
+    <button type="submit" class="btn">New Requirement</button>
+</form>
+{{template "requirement-list" .}}
+{{template "audit-log" (dict "Entries" .AuditLog)}}
+{{end}}
+
+{{define "requirement-list"}}
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            <th>Identifier</th>
+            <th>Name</th>
+            <th>Source</th>
+            <th></th>
+        </tr>
+    </thead>
+    {{range .Requirements}}
+        {{template "requirement-row" .}}
+    {{else}}
+    <tbody><tr><td colspan="5">No requirements defined yet.</td></tr></tbody>
+    {{end}}
+</table>
+{{end}}
