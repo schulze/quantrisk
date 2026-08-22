@@ -11,7 +11,7 @@ docker compose up --build
 
 The UI is available at `http://localhost:9000/`. Set `HOST_PORT` to use a different host port.
 
-The one-shot `seed` service creates an automation user and loads scenarios, controls, requirements, gaps, FAIR-CAM assignments, and relationships.
+The one-shot `seed` service runs `quantriskcli seed`, creating an automation user and loading scenarios, controls, requirements, gaps, FAIR-CAM assignments, and relationships.
 
 ## Tear down
 

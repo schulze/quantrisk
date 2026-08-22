@@ -9,7 +9,6 @@ until curl -sf "$SERVER/login" >/dev/null 2>&1; do
     sleep 1
 done
 
-$CLI create-user seed "Seed Automation" >/dev/null
-seed -db "$DB"
+$CLI seed -user seed "Seed Automation"
 
 echo "seed complete"

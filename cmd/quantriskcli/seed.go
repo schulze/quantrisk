@@ -1,11 +1,5 @@
-// Command seed populates a quantrisk database with realistic security
-// risk scenarios, controls, requirements, gaps, and their
-// relationships. All data is inserted directly via the store package.
-//
-// Usage:
-//
-//	seed -db quantrisk.db
-//	seed -db quantrisk.db -user admin "Admin User"   # also create a login user
+// Command seed populates a database with realistic security risk scenarios,
+// controls, requirements, gaps, FAIR-CAM functions, and relationships.
 package main
 
 import (
@@ -20,18 +14,15 @@ import (
 	"github.com/schulze/quantrisk/internal/store"
 )
 
-var (
-	flagDB   = flag.String("db", "quantrisk.db", "SQLite database path")
-	flagUser = flag.String("user", "", "Create a login user (username)")
-)
-
-func main() {
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: seed [flags] [display-name]\n\n")
-		fmt.Fprintf(os.Stderr, "Populate a quantrisk database with realistic fixture data.\n\n")
-		flag.PrintDefaults()
+func runSeed(args []string) {
+	fs := flag.NewFlagSet("seed", flag.ExitOnError)
+	user := fs.String("user", "", "Create a login user (username)")
+	fs.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: quantriskcli -db <path> seed [flags] [display-name]\n\n")
+		fmt.Fprintf(os.Stderr, "Populate a database with realistic fixture data.\n\n")
+		fs.PrintDefaults()
 	}
-	flag.Parse()
+	fs.Parse(args)
 
 	s, err := store.New(*flagDB)
 	if err != nil {
@@ -39,20 +30,19 @@ func main() {
 	}
 	defer s.Close()
 
-	// Optional: create user
-	if *flagUser != "" {
-		displayName := *flagUser
-		if flag.NArg() > 0 {
-			displayName = flag.Arg(0)
+	if *user != "" {
+		displayName := *user
+		if fs.NArg() > 0 {
+			displayName = fs.Arg(0)
 		}
-		if u, err := s.GetUserByUsername(*flagUser); err == nil {
-			log.Printf("user %q already exists (id=%d)", *flagUser, u.ID)
+		if u, err := s.GetUserByUsername(*user); err == nil {
+			log.Printf("user %q already exists (id=%d)", *user, u.ID)
 		} else {
-			u, err := s.CreateUser(*flagUser, displayName)
+			u, err := s.CreateUser(*user, displayName)
 			if err != nil {
 				log.Fatalf("create user: %v", err)
 			}
-			log.Printf("created user %q (id=%d)", *flagUser, u.ID)
+			log.Printf("created user %q (id=%d)", *user, u.ID)
 		}
 	}
 

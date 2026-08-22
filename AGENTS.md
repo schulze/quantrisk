@@ -13,8 +13,7 @@ Quantitative security risk and control management proof of concept. The applicat
 ## Main components
 
 - `cmd/quantriskd`: web server
-- `cmd/quantriskcli`: administration, CSV import, and simulation CLI
-- `cmd/seed`: realistic fixture loader
+- `cmd/quantriskcli`: administration, fixture seeding, CSV import, and simulation CLI
 - `fair/`: FAIR model and Monte Carlo simulation
 - `fair/cam/`: FAIR-CAM ontology and effectiveness calculations
 - `chart/`: SVG loss exceedance curves

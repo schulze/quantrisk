@@ -6,8 +6,7 @@ RUN go mod download
 COPY . .
 
 RUN go build -o /out/quantriskd ./cmd/quantriskd && \
-    go build -o /out/quantriskcli ./cmd/quantriskcli && \
-    go build -o /out/seed ./cmd/seed
+    go build -o /out/quantriskcli ./cmd/quantriskcli
 
 FROM debian:bookworm-slim
 

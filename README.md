@@ -35,8 +35,7 @@ secriskquant is a proof of concept for quantitative security risk analysis (FAIR
 
 ```text
 quantriskd    Web application and HTTP server
-quantriskcli  Database administration, imports, and simulations
-seed          Realistic proof-of-concept fixture data
+quantriskcli  Database administration, fixture seeding, imports, and simulations
 ```
 
 ## Quick start
@@ -45,13 +44,12 @@ seed          Realistic proof-of-concept fixture data
 # Build
 go build ./cmd/quantriskd
 go build ./cmd/quantriskcli
-go build ./cmd/seed
 
 # Start with a fresh database
 ./quantriskd -db quantrisk.db -addr :8000
 
 # Optionally load sample data
-./seed -db quantrisk.db
+./quantriskcli -db quantrisk.db seed
 
 # Import scenarios from CSV
 ./quantriskcli -db quantrisk.db import -risks test/fixtures/test.csv

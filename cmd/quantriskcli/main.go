@@ -52,6 +52,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  create-user     Create a user (for automation/seeding)\n")
 		fmt.Fprintf(os.Stderr, "  create-session  Create a session token for a user\n")
 		fmt.Fprintf(os.Stderr, "  migrate         Run database migrations\n")
+		fmt.Fprintf(os.Stderr, "  seed            Load realistic fixture data\n")
 		fmt.Fprintf(os.Stderr, "  import          Import CSV data into the database\n")
 		fmt.Fprintf(os.Stderr, "  simulate        Run Monte Carlo simulation from CSV\n")
 		fmt.Fprintf(os.Stderr, "\nGlobal flags:\n")
@@ -71,6 +72,8 @@ func main() {
 		runCreateSession(flag.Args()[1:])
 	case "migrate":
 		runMigrate(flag.Args()[1:])
+	case "seed":
+		runSeed(flag.Args()[1:])
 	case "import":
 		runImport(flag.Args()[1:])
 	case "simulate":
